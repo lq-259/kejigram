@@ -4,8 +4,8 @@ zaihua_pipeline/zaihua_pipeline/
 dates/20*/
 
 # Credentials
-zaihua_pipeline/.env
-zaihua_pipeline/account-b-profile.tar.gz
+.env
+account-b-profile.tar.gz
 
 # Cache
 __pycache__/

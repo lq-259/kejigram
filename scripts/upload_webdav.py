@@ -64,7 +64,7 @@ def upload_file(session, base_url, local_file, remote_file):
 
 
 def upload_date(date_str, dry_run=False):
-    load_env(Path(__file__).parent.parent / "zaihua_pipeline" / ".env")
+    load_env(Path(__file__).parent.parent / ".env")
     base_url = os.environ.get("WEBDAV_BASE_URL", DEFAULT_BASE_URL)
     username = os.environ.get("WEBDAV_USERNAME")
     password = os.environ.get("WEBDAV_PASSWORD")

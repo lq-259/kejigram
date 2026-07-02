@@ -543,7 +543,7 @@ def write_source_links(plan_slides, outpath, date_str):
 
 
 def main():
-    load_env_file(PROJECT_ROOT / "zaihua_pipeline" / ".env")
+    load_env_file(PROJECT_ROOT / ".env")
     date_str = parse_date_arg()
     day_dir = ROOT / date_str
     day_dir.mkdir(parents=True, exist_ok=True)
