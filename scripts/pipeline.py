@@ -797,7 +797,7 @@ def main():
     print("[5] Rendering video...")
     render_script = Path("/root/.config/opencode/skills/zaihua-video/scripts/render_video.mjs")
     if not render_script.exists():
-        render_script = ROOT / "render_video.mjs"
+        render_script = Path(__file__).parent / "render_video.mjs"
     
     out_mp4 = day_dir / f"video_{date_str}.mp4"
     try:
@@ -820,7 +820,7 @@ def main():
         print("[7] Uploading to WebDAV...")
         upload_script = Path("/root/.config/opencode/skills/zaihua-video/scripts/upload_webdav.py")
         if not upload_script.exists():
-            upload_script = ROOT / "upload_webdav.py"
+            upload_script = Path(__file__).parent / "upload_webdav.py"
         try:
             subprocess.run([sys.executable, str(upload_script), date_str], check=True)
         except subprocess.CalledProcessError as e:
