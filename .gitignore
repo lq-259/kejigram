@@ -1,6 +1,7 @@
 # Generated content
 zaihua_pipeline/20*/
 zaihua_pipeline/zaihua_pipeline/
+dates/20*/
 
 # Credentials
 zaihua_pipeline/.env
