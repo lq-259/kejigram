@@ -10,7 +10,9 @@ from pathlib import Path
 from urllib.parse import urlencode
 
 # ─── Config ───
-ROOT = Path.cwd() / "zaihua_pipeline"
+# Get project root (parent of scripts/ directory)
+PROJECT_ROOT = Path(__file__).parent.parent
+ROOT = PROJECT_ROOT / "dates"
 BASE = ROOT
 MIMO_BASE = "https://api.xiaomimimo.com/v1"
 MIMO_KEY = os.environ.get("MIMO_KEY", "")
@@ -541,7 +543,7 @@ def write_source_links(plan_slides, outpath, date_str):
 
 
 def main():
-    load_env_file(ROOT / ".env")
+    load_env_file(PROJECT_ROOT / "zaihua_pipeline" / ".env")
     date_str = parse_date_arg()
     day_dir = ROOT / date_str
     day_dir.mkdir(parents=True, exist_ok=True)
@@ -549,7 +551,7 @@ def main():
     
     # ── Stage 0: Fetch from Telegram ──
     summaries_path = day_dir / "summaries.json"
-    fetch_script = ROOT / "fetch_telegram.py"
+    fetch_script = Path(__file__).parent / "fetch_telegram.py"
     if fetch_script.exists() and (not summaries_path.exists()):
         print("[0] Fetching Telegram channel data...")
         cmd = ["python3", str(fetch_script)]
@@ -795,9 +797,7 @@ def main():
     
     # ── Stage D: Render video ──
     print("[5] Rendering video...")
-    render_script = Path("/root/.config/opencode/skills/zaihua-video/scripts/render_video.mjs")
-    if not render_script.exists():
-        render_script = Path(__file__).parent / "render_video.mjs"
+    render_script = Path(__file__).parent / "render_video.mjs"
     
     out_mp4 = day_dir / f"video_{date_str}.mp4"
     try:
@@ -818,9 +818,7 @@ def main():
     upload_webdav = os.environ.get("UPLOAD_WEBDAV", "1").strip().lower() not in ("0", "false", "no")
     if upload_webdav:
         print("[7] Uploading to WebDAV...")
-        upload_script = Path("/root/.config/opencode/skills/zaihua-video/scripts/upload_webdav.py")
-        if not upload_script.exists():
-            upload_script = Path(__file__).parent / "upload_webdav.py"
+        upload_script = Path(__file__).parent / "upload_webdav.py"
         try:
             subprocess.run([sys.executable, str(upload_script), date_str], check=True)
         except subprocess.CalledProcessError as e:

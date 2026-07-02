@@ -10,7 +10,7 @@ from urllib.parse import quote
 import requests
 
 
-ROOT = Path.cwd() / "zaihua_pipeline"
+ROOT = Path(__file__).parent.parent / "dates"
 DEFAULT_BASE_URL = "http://192.168.15.5:5244/dav"
 DEFAULT_REMOTE_ROOT = "/和彩云/视频"
 
@@ -64,7 +64,7 @@ def upload_file(session, base_url, local_file, remote_file):
 
 
 def upload_date(date_str, dry_run=False):
-    load_env(ROOT / ".env")
+    load_env(Path(__file__).parent.parent / "zaihua_pipeline" / ".env")
     base_url = os.environ.get("WEBDAV_BASE_URL", DEFAULT_BASE_URL)
     username = os.environ.get("WEBDAV_USERNAME")
     password = os.environ.get("WEBDAV_PASSWORD")

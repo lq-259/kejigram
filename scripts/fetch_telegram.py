@@ -12,7 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-ROOT = Path.cwd() / "zaihua_pipeline"
+ROOT = Path(__file__).parent.parent / "dates"
 TG_URL = "https://t.me/s/zaihuapd"
 
 
