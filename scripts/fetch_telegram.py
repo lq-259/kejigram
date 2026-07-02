@@ -1,36 +1,21 @@
 #!/usr/bin/env python3
 """Fetch yesterday's posts from the Telegram public preview page."""
-import html
 import argparse
 import json
-import re
-import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
 
+# Import shared utilities
+import sys
+_script_dir = Path(__file__).parent
+if str(_script_dir) not in sys.path:
+    sys.path.insert(0, str(_script_dir))
+from common import ROOT, clean_public_text
 
-ROOT = Path(__file__).parent.parent / "dates"
 TG_URL = "https://t.me/s/zaihuapd"
-
-
-BRAND_PATTERNS = [
-    r"🌸\s*在花频道\s*[·・|｜-]?\s*备用频道\s*[·・|｜-]?\s*投稿通道",
-    r"🌸\s*在花频道",
-    r"🍀\s*在花频道",
-    r"在花频道\s*[·・|｜-]?\s*备用频道\s*[·・|｜-]?\s*投稿通道",
-    r"在花频道",
-    r"备用频道",
-    r"投稿通道",
-    r"@?zaihuapd",
-    r"@?zaihuatg",
-    r"@?zaihuabot",
-    r"@?zaihua",
-    r"[·・|｜-]?\s*英文频道",
-    r"[·・|｜-]?\s*茶馆讨论",
-]
 
 
 def parse_args():
@@ -38,7 +23,7 @@ def parse_args():
     parser.add_argument("date", nargs="?", help="Target date, defaults to yesterday: YYYY-MM-DD")
     parser.add_argument("--force", action="store_true", help="Overwrite existing summaries.json and refresh images")
     args = parser.parse_args()
-    if args.date and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.date):
+    if args.date and not __import__('re').fullmatch(r"\d{4}-\d{2}-\d{2}", args.date):
         parser.error("date must use YYYY-MM-DD")
     return args
 
@@ -47,19 +32,6 @@ def parse_target_date(date_arg=None):
     if date_arg:
         return datetime.strptime(date_arg, "%Y-%m-%d").date()
     return (datetime.now() - timedelta(days=1)).date()
-
-
-def clean_text(text):
-    return re.sub(r"\s+", " ", html.unescape(text or "")).strip()
-
-
-def clean_public_text(text):
-    text = clean_text(text)
-    for pattern in BRAND_PATTERNS:
-        text = re.sub(pattern, "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*([·・|｜-])\s*([·・|｜-]\s*)+", r"\1", text)
-    text = re.sub(r"\s+", " ", text).strip(" ·・|｜-/，,。")
-    return text
 
 
 def fetch_page():
@@ -102,7 +74,7 @@ def parse_messages(page_html):
         photos = []
         photo_wrap = msg.find("a", class_="tgme_widget_message_photo_wrap")
         if photo_wrap:
-            match = re.search(r"background-image:url\('([^']+)'\)", photo_wrap.get("style", ""))
+            match = __import__('re').search(r"background-image:url\('([^']+)'\)", photo_wrap.get("style", ""))
             if match:
                 photos.append(match.group(1))
 
@@ -127,6 +99,7 @@ def parse_messages(page_html):
             "imgs": photos,
             "srcs": srcs,
         })
+    return items
     return items
 
 

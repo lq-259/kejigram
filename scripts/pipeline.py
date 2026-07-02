@@ -4,83 +4,24 @@ Stage 2: Execute LLM plan with PER-SEGMENT TTS for perfect sync.
 Each paragraph gets its own TTS audio → measured → concatenated.
 Result: exact timeline, no estimation drift.
 """
-import os, sys, re, json, subprocess, time, requests, html, base64
+import os, sys, re, json, subprocess, time, requests, base64
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 
+# Import shared utilities
+_script_dir = Path(__file__).parent
+if str(_script_dir) not in sys.path:
+    sys.path.insert(0, str(_script_dir))
+from common import ROOT, clean_public_text, is_internal_source_url, load_env_file
+
 # ─── Config ───
-# Get project root (parent of scripts/ directory)
-PROJECT_ROOT = Path(__file__).parent.parent
-ROOT = PROJECT_ROOT / "dates"
-BASE = ROOT
 MIMO_BASE = "https://api.xiaomimimo.com/v1"
 MIMO_KEY = os.environ.get("MIMO_KEY", "")
 CLONE_REF = Path(os.environ.get("CLONE_REF", "/root/视频/科技简报/tts_assets/refs/vo_EQHDJ201_5_ganyu_15.wav"))
 CLONE_STYLE = os.environ.get("CLONE_STYLE", "保持参考音频的音色和自然节奏，语速略微加快约 1%。")
 TTS_BACKEND = os.environ.get("TTS_BACKEND", "mimo_clone").strip().lower()
 MILORA_TTS_URL = os.environ.get("MILORA_TTS_URL", "https://api.milorapart.top/apis/mbAIsc")
-
-BRAND_PATTERNS = [
-    r"🌸\s*在花频道\s*[·・|｜-]?\s*备用频道\s*[·・|｜-]?\s*投稿通道",
-    r"🌸\s*在花频道",
-    r"🍀\s*在花频道",
-    r"在花频道\s*[·・|｜-]?\s*备用频道\s*[·・|｜-]?\s*投稿通道",
-    r"在花频道",
-    r"备用频道",
-    r"投稿通道",
-    r"@?zaihuapd",
-    r"@?zaihuatg",
-    r"@?zaihuabot",
-    r"@?zaihua",
-    r"[·・|｜-]?\s*英文频道",
-    r"[·・|｜-]?\s*茶馆讨论",
-]
-
-
-def clean_public_text(text):
-    text = html.unescape(str(text or ""))
-    for pattern in BRAND_PATTERNS:
-        text = re.sub(pattern, "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s+", " ", text).strip(" ·・|｜-/，,。")
-    return text
-
-
-def is_bad_title(text):
-    text = clean_public_text(text)
-    if not text or len(text) < 4:
-        return True
-    return not re.search(r"[A-Za-z0-9\u4e00-\u9fff]", text)
-
-
-def title_from_spoken(text):
-    text = clean_public_text(text)
-    if "，" in text:
-        text = text.split("，", 1)[0]
-    if len(text) > 34:
-        text = text[:33] + "…"
-    return text
-
-
-def load_env_file(path):
-    if not path.exists():
-        return
-    for raw in path.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
-
-
-def is_internal_source_url(href):
-    href = str(href or "").lower()
-    return any(token in href for token in [
-        "t.me/zaihua",
-        "t.me/zaihuapd",
-        "t.me/zaihuatg",
-        "t.me/zaihuabot",
-    ])
 
 def mimo_tts(text, outpath, voice, style="标准播音腔，语速平稳，吐字清晰，专业播音员风格。", max_retry=3):
     url = f"{MIMO_BASE}/chat/completions"

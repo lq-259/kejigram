@@ -9,8 +9,12 @@ from urllib.parse import quote
 
 import requests
 
+# Import shared utilities
+_script_dir = Path(__file__).parent
+if str(_script_dir) not in sys.path:
+    sys.path.insert(0, str(_script_dir))
+from common import ROOT
 
-ROOT = Path(__file__).parent.parent / "dates"
 DEFAULT_BASE_URL = "http://192.168.15.5:5244/dav"
 DEFAULT_REMOTE_ROOT = "/和彩云/视频"
 
@@ -64,7 +68,8 @@ def upload_file(session, base_url, local_file, remote_file):
 
 
 def upload_date(date_str, dry_run=False):
-    load_env(Path(__file__).parent.parent / ".env")
+    from common import load_env_file
+    load_env_file(Path(__file__).parent.parent / ".env")
     base_url = os.environ.get("WEBDAV_BASE_URL", DEFAULT_BASE_URL)
     username = os.environ.get("WEBDAV_USERNAME")
     password = os.environ.get("WEBDAV_PASSWORD")

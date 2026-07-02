@@ -1,0 +1,62 @@
+/* Self-contained fallback when html-ppt assets are not installed. */
+:root{
+  --bg:#f5f1e8;
+  --surface:#fffaf2;
+  --text-1:#201a16;
+  --text-2:#4f443b;
+  --text-3:#827469;
+  --accent:#cc4b2f;
+  --border:rgba(32,26,22,.14);
+  --radius:18px;
+  --radius-lg:26px;
+  --shadow:0 18px 50px rgba(58,42,28,.11);
+  --grad:linear-gradient(180deg,#e45735,#ffb84d);
+}
+html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:var(--bg)}
+body.tpl-weekly-report{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',Arial,sans-serif;color:var(--text-1)}
+.deck{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--bg)}
+.slide{position:absolute;inset:0;width:100%;height:100%;box-sizing:border-box;display:none;flex-direction:column;overflow:hidden;opacity:0;background:radial-gradient(circle at 12% 10%,rgba(255,184,77,.28),transparent 30%),radial-gradient(circle at 82% 18%,rgba(204,75,47,.16),transparent 28%),linear-gradient(135deg,#fffaf2 0%,#f3eadc 52%,#eadfcc 100%)}
+.slide.is-active{display:flex;opacity:1;z-index:2}
+h1,p,ol,ul,li{box-sizing:border-box}
+.kicker{font-family:'JetBrains Mono','Noto Sans SC',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:800;font-size:18px}
+/* align with render_video.mjs — disable transitions, script controls instant switching */
+.slide.is-active{z-index:2}
+.slide{transition:none!important;transform:none!important}
+
+/* Template 12 adaptations for 16:9 news video */
+.tpl-weekly-report .slide{padding:56px 84px 56px!important;color:var(--text-1)}
+.topbar,.footer{display:flex;align-items:center;justify-content:space-between;color:var(--text-3);font-family:'JetBrains Mono',monospace;font-size:18px}
+.topbar{margin-bottom:28px}
+.footer{position:absolute;left:84px;right:84px;bottom:26px}
+
+.cover,.end{justify-content:center;align-items:center;text-align:center}
+
+.cover .h1,.end .h1{font-size:136px;line-height:.92;margin:10px 0 28px;text-align:center}
+.cover .lede,.end .lede{font-size:34px;max-width:1200px;margin:0 auto 32px;line-height:1.45}
+.cover .kpi{max-width:900px;margin:0 auto;text-align:left}
+.cover .kpi .value{font-size:58px}
+.cover-panel{width:100%;max-width:1580px;margin:auto 0;text-align:left}
+.cover-title-row{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:26px}
+.cover-title-row .cover-title{font-size:76px;line-height:.98;font-weight:850;letter-spacing:-.055em;margin:0}
+.cover-title-row .cover-count{flex:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 22px;box-shadow:var(--shadow);font-weight:800;color:var(--accent);font-size:28px}
+.cover-news-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:13px}
+.cover-news-list.two-col{grid-template-columns:1fr 1fr;column-gap:22px;row-gap:12px}
+.cover-news-list li{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 17px;display:grid;grid-template-columns:54px 1fr;gap:13px;align-items:center;box-shadow:var(--shadow);min-height:58px}
+.cover-news-list li span{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--accent);font-weight:800}
+.cover-news-list li b{font-size:25px;line-height:1.22;font-weight:750;color:var(--text-1)}
+.cover-news-list.two-col li b{font-size:22px;line-height:1.2}
+
+.news-stage{flex:1;min-height:0;display:grid;grid-template-rows:auto 1fr;gap:24px}
+.news-title{font-size:66px;line-height:1.08;font-weight:800;letter-spacing:-.04em;max-width:1500px}
+.brief-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
+.news-brief-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 30px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.news-brief-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--grad)}
+.brief-label{font-size:18px;color:var(--accent);font-weight:800;letter-spacing:.06em;margin-bottom:16px}
+.news-brief-card ul{margin:0;padding-left:1.1em}
+.news-brief-card li{font-size:30px;line-height:1.38;font-weight:650;margin:0 0 12px;color:var(--text-1)}
+.image-popover{position:fixed;inset:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:0;z-index:99;opacity:0;transition:none;pointer-events:none;overflow:hidden}
+.image-popover.on{opacity:1}
+.image-popover img{width:auto;height:auto;max-width:66.666vw;max-height:100vh;object-fit:contain;object-position:center center;background:#000}
+.image-popover img.landscape{width:66.666vw;height:auto;max-height:100vh}
+.image-popover img.portrait{height:100vh;width:auto;max-width:66.666vw}
+.image-popover .caption{display:none}
