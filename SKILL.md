@@ -283,6 +283,51 @@ python3 /root/视频/科技简报/zaihua_pipeline/upload_webdav.py YYYY-MM-DD --
 UPLOAD_WEBDAV=0 python3 /root/视频/科技简报/zaihua_pipeline/pipeline.py --run YYYY-MM-DD
 ```
 
+## Bilibili 投稿
+
+视频生成并确认无误后，可执行 Bilibili 投稿流程。
+
+### 1. 准备投稿素材
+
+视频生成后，agent 必须人工判断并写入：
+
+```bash
+/root/视频/科技简报/zaihua_pipeline/YYYY-MM-DD/short_video_title.txt
+/root/视频/科技简报/zaihua_pipeline/YYYY-MM-DD/cover_image.*
+/root/视频/科技简报/zaihua_pipeline/YYYY-MM-DD/cover_selection.md
+```
+
+生成规则：
+
+- `short_video_title.txt`：阅读 `zaihua-plan.json`、`script_YYYY-MM-DD.md` 和关键新闻，写一个适合短视频平台的一行标题。
+- `cover_image.*`：查看当天 `imgs/` 中的候选图片，结合新闻重要性、视觉冲击力、平台封面可读性选择一张复制出来。
+- `cover_selection.md`：记录候选判断、最终选择的新闻序号、原图路径、封面路径和选择理由。
+
+### 2. 执行投稿脚本
+
+```bash
+cd /root/视频/科技简报/zaihua_pipeline
+node scripts/bilibili_upload_with_profile.js
+```
+
+脚本行为：
+
+1. 启动 Chromium（加载已登录的 profile）
+2. 打开 Bilibili 投稿页面
+3. 自动上传视频文件
+4. 自动填写标题、描述、标签
+5. 自动选择"内容无需标注"
+6. **停在发布前**（不点击"立即投稿"）
+7. 人工检查确认后，手动点击发布
+
+### 3. 保存浏览器 profile
+
+投稿完成后，保存 profile 以便下次使用：
+
+```bash
+tar -czf account-b-profile.tar.gz /tmp/bili_profile/account-b/
+```
+
 ## HTML 视觉规范
 
 当前默认风格：html-ppt full-deck template 12，`weekly-report`。
