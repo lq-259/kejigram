@@ -136,19 +136,38 @@ const TAGS = ['科技新闻', '苹果', '阿里巴巴', 'Meta', 'AI', '每日简
   });
   await new Promise(r => setTimeout(r, 500));
   
-  // ===== STOP BEFORE PUBLISHING =====
-  console.log('\n========================================');
-  console.log('[bili] ✅ READY TO PUBLISH');
-  console.log('[bili] ⏹️  STOPPED before clicking submit');
-  console.log('========================================');
-  console.log('[bili] Review the form in the browser.');
-  console.log('[bili] If everything looks good, manually click:');
-  console.log('        [立即投稿] button');
-  console.log('[bili] Browser will stay open.');
-  console.log('========================================\n');
+  // Click submit
+  console.log('[bili] Clicking submit...');
+  const submitBtn = await page.$('.submit-add');
+  if (submitBtn) {
+    await submitBtn.click();
+    console.log('[bili] Submit clicked!');
+  } else {
+    console.error('[bili] Submit button not found!');
+  }
   
-  // Keep alive
-  setInterval(() => {}, 1000);
+  // Wait for submission result
+  console.log('[bili] Waiting for submission result...');
+  for (let i = 0; i < 60; i++) {
+    await new Promise(r => setTimeout(r, 1500));
+    const status = await page.evaluate(() => ({
+      ok: /恭喜你上传第一个稿件|查看进度|再投一个|稿件投递成功/.test(document.body.innerText),
+      risk: /验证码|短信验证|实名认证/.test(document.body.innerText),
+      text: document.body.innerText.slice(0, 500)
+    }));
+    
+    if (status.ok) {
+      console.log('[bili] ✅ Upload successful!');
+      break;
+    }
+    if (status.risk) {
+      console.log('[bili] ⚠️ Risk control detected, needs manual intervention');
+      break;
+    }
+  }
+  
+  console.log('[bili] Done!');
+  await browser.close();
   
 })().catch(e => {
   console.error('[bili] Error:', e.stack || e);
