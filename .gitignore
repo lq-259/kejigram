@@ -1,11 +1,10 @@
 # Generated content
-zaihua_pipeline/20*/
-zaihua_pipeline/zaihua_pipeline/
 dates/20*/
 
 # Credentials
 .env
 account-b-profile.tar.gz
+bili_profile/
 
 # Cache
 __pycache__/

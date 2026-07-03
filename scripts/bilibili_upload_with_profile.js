@@ -1,32 +1,38 @@
 const puppeteer = require('/tmp/puprec/node_modules/puppeteer');
 const fs = require('fs');
+const path = require('path');
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const STOP_BEFORE_PUBLISH = args.includes('--stop-before-publish') || args.includes('--dry-run');
 
 // === Configuration ===
-const DATE = '2026-07-02';
-const VIDEO = '/root/opencode/科技简报/dates/2026-07-02/video_2026-07-02.mp4';
-const COVER = '/root/opencode/科技简报/dates/2026-07-02/cover_image.jpg';
-const TITLE = '苹果邮件漏洞可暴露真实邮箱；阿里6亿美元和解美国调查；Meta出售AI算力引发韩股大跌';
-const DESC = `2026年7月2日科技新闻简报
+const PROJECT_ROOT = path.dirname(__dirname);
+const PROFILE_DIR = path.join(PROJECT_ROOT, 'bili_profile', 'account-b');
 
-本期重点：
-• 苹果"隐藏邮件地址"功能存在隐私漏洞，攻击者可暴露真实邮箱
-• 阿里巴巴及支付服务商支付6亿美元与美国司法部和解
-• Meta计划出售多余AI算力，引发韩国股市大跌
-• 张雪峰退出公司股东，股份转给11岁女儿
-• OnePlus欧洲收缩，引导用户转购Oppo
-• Cloudflare将拦截部分AI爬虫，点名Google
-• 北京通报轻型飞机撞楼事件
-• 证监会同意宇树科技科创板IPO
-• 美团7月起骑手职伤险全覆盖`;
-const TAGS = ['科技新闻', '苹果', '阿里巴巴', 'Meta', 'AI', '每日简报'];
+// Check if profile exists
+if (!fs.existsSync(PROFILE_DIR)) {
+  console.error(`[bili] Profile not found: ${PROFILE_DIR}`);
+  console.error('[bili] Please run once with --stop-before-publish to login manually,');
+  console.error('       then the profile will be saved automatically.');
+  process.exit(1);
+}
+
+const DATE = process.env.BILI_DATE || '2026-07-02';
+const VIDEO = process.env.BILI_VIDEO || path.join(PROJECT_ROOT, 'dates', DATE, `video_${DATE}.mp4`);
+const COVER = process.env.BILI_COVER || path.join(PROJECT_ROOT, 'dates', DATE, 'cover_image.jpg');
+const TITLE = process.env.BILI_TITLE || '科技新闻简报';
+const DESC = process.env.BILI_DESC || `科技新闻简报 ${DATE}`;
+const TAGS = (process.env.BILI_TAGS || '科技新闻,AI,每日简报').split(',');
 
 (async () => {
-  console.log('[bili] Starting browser with saved profile...');
+  console.log(`[bili] Using profile: ${PROFILE_DIR}`);
+  console.log(`[bili] Stop before publish: ${STOP_BEFORE_PUBLISH}`);
   
   const browser = await puppeteer.launch({
     headless: false,
     executablePath: '/usr/bin/chromium',
-    userDataDir: '/tmp/bili_profile/account-b',
+    userDataDir: PROFILE_DIR,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -46,6 +52,7 @@ const TAGS = ['科技新闻', '苹果', '阿里巴巴', 'Meta', 'AI', '每日简
   await new Promise(r => setTimeout(r, 4000));
   
   // Check if logged in
+  console.log('[bili] Checking login status...');
   const nav = await page.evaluate(async () => {
     try {
       const r = await fetch('https://api.bilibili.com/x/web-interface/nav', { credentials: 'include' });
@@ -60,7 +67,9 @@ const TAGS = ['科技新闻', '苹果', '阿里巴巴', 'Meta', 'AI', '每日简
     console.error('[bili] Not logged in!');
     console.error('[bili] Please login manually in the browser.');
     console.error('[bili] Browser will stay open.');
-    // Keep browser open
+    if (STOP_BEFORE_PUBLISH) {
+      console.log('[bili] After login, close browser and profile will be saved.');
+    }
     return;
   }
   
@@ -135,6 +144,19 @@ const TAGS = ['科技新闻', '苹果', '阿里巴巴', 'Meta', 'AI', '每日简
     if (btn) btn.scrollIntoView({ block: 'center' });
   });
   await new Promise(r => setTimeout(r, 500));
+  
+  if (STOP_BEFORE_PUBLISH) {
+    console.log('\n========================================');
+    console.log('[bili] ✅ READY TO PUBLISH');
+    console.log('[bili] ⏹️  STOPPED before clicking submit');
+    console.log('========================================');
+    console.log('[bili] Review the form in the browser.');
+    console.log('[bili] If everything looks good, manually click:');
+    console.log('        [立即投稿] button');
+    console.log('[bili] Browser will stay open.');
+    console.log('========================================\n');
+    return;
+  }
   
   // Click submit
   console.log('[bili] Clicking submit...');

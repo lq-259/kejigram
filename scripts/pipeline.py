@@ -4,7 +4,7 @@ Stage 2: Execute LLM plan with PER-SEGMENT TTS for perfect sync.
 Each paragraph gets its own TTS audio → measured → concatenated.
 Result: exact timeline, no estimation drift.
 """
-import os, sys, re, json, subprocess, time, requests, base64
+import os, sys, re, json, subprocess, time, requests, base64, html
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
@@ -15,6 +15,9 @@ if str(_script_dir) not in sys.path:
     sys.path.insert(0, str(_script_dir))
 from common import ROOT, clean_public_text, is_internal_source_url, load_env_file
 
+# Get project root
+PROJECT_ROOT = _script_dir.parent
+
 # ─── Config ───
 MIMO_BASE = "https://api.xiaomimimo.com/v1"
 MIMO_KEY = os.environ.get("MIMO_KEY", "")
@@ -22,6 +25,22 @@ CLONE_REF = Path(os.environ.get("CLONE_REF", "/root/视频/科技简报/tts_asse
 CLONE_STYLE = os.environ.get("CLONE_STYLE", "保持参考音频的音色和自然节奏，语速略微加快约 1%。")
 TTS_BACKEND = os.environ.get("TTS_BACKEND", "mimo_clone").strip().lower()
 MILORA_TTS_URL = os.environ.get("MILORA_TTS_URL", "https://api.milorapart.top/apis/mbAIsc")
+
+# ─── Helpers (not in common.py) ───
+def is_bad_title(text):
+    text = clean_public_text(text)
+    if not text or len(text) < 4:
+        return True
+    return not re.search(r"[A-Za-z0-9\u4e00-\u9fff]", text)
+
+
+def title_from_spoken(text):
+    text = clean_public_text(text)
+    if "，" in text:
+        text = text.split("，", 1)[0]
+    if len(text) > 34:
+        text = text[:33] + "…"
+    return text
 
 def mimo_tts(text, outpath, voice, style="标准播音腔，语速平稳，吐字清晰，专业播音员风格。", max_retry=3):
     url = f"{MIMO_BASE}/chat/completions"

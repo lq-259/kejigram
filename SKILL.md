@@ -310,15 +310,46 @@ cd /root/视频/科技简报/zaihua_pipeline
 node scripts/bilibili_upload_with_profile.js
 ```
 
+默认行为：自动填写表单并**立即投稿**。
+
+可选参数：
+
+```bash
+# 停在发布前（人工检查）
+node scripts/bilibili_upload_with_profile.js --stop-before-publish
+
+# 同上
+node scripts/bilibili_upload_with_profile.js --dry-run
+```
+
 脚本行为：
 
-1. 启动 Chromium（加载已登录的 profile）
+1. 启动 Chromium（加载 `bili_profile/account-b/` 目录下的已登录 profile）
 2. 打开 Bilibili 投稿页面
 3. 自动上传视频文件
 4. 自动填写标题、描述、标签
 5. 自动选择"内容无需标注"
 6. 自动点击"立即投稿"按钮
 7. 等待投稿结果并关闭浏览器
+
+第一次使用需要先手动登录：
+
+```bash
+# 停在登录页面，手动扫码/密码登录
+node scripts/bilibili_upload_with_profile.js --stop-before-publish
+# 登录后关闭浏览器，profile 自动保存到 bili_profile/account-b/
+```
+
+环境变量（可选）：
+
+```bash
+BILI_DATE=2026-07-02 \
+BILI_VIDEO=/path/to/video.mp4 \
+BILI_TITLE="自定义标题" \
+BILI_DESC="自定义描述" \
+BILI_TAGS="科技新闻,AI,每日简报" \
+node scripts/bilibili_upload_with_profile.js
+```
 
 ### 3. 保存浏览器 profile
 
