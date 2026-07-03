@@ -21,7 +21,7 @@ PROJECT_ROOT = _script_dir.parent
 # ─── Config ───
 MIMO_BASE = "https://api.xiaomimimo.com/v1"
 MIMO_KEY = os.environ.get("MIMO_KEY", "")
-CLONE_REF = Path(os.environ.get("CLONE_REF", "/root/视频/科技简报/tts_assets/refs/vo_EQHDJ201_5_ganyu_15.wav"))
+CLONE_REF = Path(os.environ.get("CLONE_REF", str(Path(__file__).parent.parent / "tts_assets" / "refs" / "vo_EQHDJ201_5_ganyu_15.wav")))
 CLONE_STYLE = os.environ.get("CLONE_STYLE", "保持参考音频的音色和自然节奏，语速略微加快约 1%。")
 TTS_BACKEND = os.environ.get("TTS_BACKEND", "mimo_clone").strip().lower()
 MILORA_TTS_URL = os.environ.get("MILORA_TTS_URL", "https://api.milorapart.top/apis/mbAIsc")
